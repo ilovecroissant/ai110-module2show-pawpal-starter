@@ -1,6 +1,24 @@
 # PawPal+ Project Reflection
 
 ## 1. System Design
+Three core actions:
+    1. Enter owner name and pet info
+    2. Add/ edit tasks
+    3. Generate daily schedule
+
+Four objects:
+    1. Owner
+        Attributes: Name
+        Methods: 
+    2. Pet
+        Attributes: animal_type, age, color
+        Methods: add_pet
+    3. Task
+        Attributes:
+        Methods: add_task, edit_task
+    4. Scheduler
+        Attributes:
+        Methods: generate_daily_schedule
 
 **a. Initial design**
 

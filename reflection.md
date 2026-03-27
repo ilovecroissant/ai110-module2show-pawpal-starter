@@ -25,11 +25,20 @@ Four objects:
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+I chose 4 classes: Owner, Pet, Task, Scheduler
+    1. Owner: Have information about the Owner
+    2. Pet: data container for pets
+    3. Task: data container for tasks
+    4. Scheduler: To keep track of the Owner, their Pet and the tasks assigned
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+Yes, my design change during implementation. I added Priority enum:
+
+Replaced the raw String priority field on Task with a Priority enum (HIGH, MEDIUM, LOW). A plain string has no constraints — someone could pass "urgent" or "banana" and the scheduler would either crash or silently produce a wrong order when sorting. The enum makes invalid values impossible at the code level and gives generate_daily_schedule a reliable way to compare and sort tasks.
 ---
 
 ## 2. Scheduling Logic and Tradeoffs

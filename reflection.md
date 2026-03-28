@@ -53,6 +53,10 @@ Replaced the raw String priority field on Task with a Priority enum (HIGH, MEDIU
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+The conflict detector checks whether two tasks' *time windows overlap* (start time + duration) rather than only flagging exact same-start-time matches. This means a task starting at 07:35 is correctly flagged as conflicting with one that started at 07:30 and runs for 10 minutes (ending at 07:40), even though their start times differ.
+
+The tradeoff is that the scheduler treats every conflict as equally urgent — it does not distinguish between a 1-minute overlap and a full 30-minute collision, and it does not attempt to automatically resolve conflicts by reordering tasks. For a demo app where the owner manually reviews the schedule, this is reasonable: surfacing all overlaps as warnings gives the owner full visibility without the scheduler making assumptions about which task to move. A production scheduler might rank conflicts by severity or auto-shift lower-priority tasks, but that added complexity is unnecessary here.
+
 ---
 
 ## 3. AI Collaboration

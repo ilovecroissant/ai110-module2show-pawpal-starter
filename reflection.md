@@ -39,6 +39,7 @@ I chose 4 classes: Owner, Pet, Task, Scheduler
 Yes, my design change during implementation. I added Priority enum:
 
 Replaced the raw String priority field on Task with a Priority enum (HIGH, MEDIUM, LOW). A plain string has no constraints — someone could pass "urgent" or "banana" and the scheduler would either crash or silently produce a wrong order when sorting. The enum makes invalid values impossible at the code level and gives generate_daily_schedule a reliable way to compare and sort tasks.
+
 ---
 
 ## 2. Scheduling Logic and Tradeoffs

@@ -2,6 +2,10 @@
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
 
+## 📸 Demo
+
+<a href="/course_images/ai110/PawPal+.png" target="_blank"><img src='/course_images/ai110/PawPal+.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+
 ## Scenario
 
 A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
@@ -21,6 +25,19 @@ Your final app should:
 - Generate a daily schedule/plan based on constraints and priorities
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
+
+## Features
+
+| Feature | Description |
+|---|---|
+| **Chronological sorting** | `Scheduler.sort_by_time()` orders all pending tasks by `start_time` (HH:MM) so the day's plan reads top-to-bottom in time order. |
+| **Priority-based scheduling** | `generate_daily_schedule()` ranks tasks by priority (HIGH → MEDIUM → LOW) before feeding them to other scheduler methods. |
+| **Overlap conflict detection** | `detect_conflicts()` compares every pair of pending tasks using interval arithmetic (`A.start < B.end AND B.start < A.end`). Back-to-back tasks with zero gap are not false-positives. Works across all pets. |
+| **Daily & weekly recurrence** | Marking a `daily` or `weekly` task done via `complete_task()` automatically calls `next_occurrence()`, which creates a copy with `completed=False` and a `due_date` advanced by 1 day or 7 days respectively. One-off (`once`) tasks produce no follow-up. |
+| **Task filtering** | `filter_tasks(completed, pet_name)` lets callers narrow the task list by completion status, by pet, or both — useful for per-pet views and reporting. |
+| **Pending time summary** | `total_time_minutes()` sums `duration_minutes` across all pending tasks so the owner can see how much care time remains in the day. |
+| **Multi-pet support** | Tasks are stored per `Pet` and aggregated through `Owner.all_tasks`. Conflicts are detected across pets as well as within the same pet. |
+| **In-app "Done" buttons** | The Streamlit UI renders a Done button for each scheduled task; clicking it calls `complete_task()` and reruns the page so recurrence and metrics update instantly. |
 
 ## Getting started
 

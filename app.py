@@ -33,7 +33,7 @@ if st.button("Add pet"):
     st.success(f"Added {pet_name} the {species}.")
 
 if owner.pets:
-    st.write("Your pets:")
+    st.caption("Your pets")
     st.table([{"Name": p.name, "Type": p.animal_type, "Color": p.color} for p in owner.pets])
 else:
     st.info("No pets yet. Add one above.")
@@ -42,6 +42,8 @@ st.divider()
 
 # --- Add a Task ---
 st.subheader("Add a Task")
+
+PRIORITY_BADGE = {"HIGH": "🔴 HIGH", "MEDIUM": "🟡 MEDIUM", "LOW": "🟢 LOW"}
 
 if not owner.pets:
     st.warning("Add a pet first before adding tasks.")
@@ -73,18 +75,22 @@ else:
         st.success(f"Added '{task_title}' for {selected_pet_name}.")
 
     if owner.all_tasks:
-        st.write("Current tasks:")
-        st.table([
-            {
-                "Pet": t.pet.name,
-                "Task": t.title,
-                "Start": t.start_time,
-                "Duration (min)": t.duration_minutes,
-                "Priority": t.priority.name,
-                "Done": t.completed,
-            }
-            for t in owner.all_tasks
-        ])
+        st.caption("All tasks — click a column header to sort")
+        st.dataframe(
+            [
+                {
+                    "Pet": t.pet.name,
+                    "Task": t.title,
+                    "Start": t.start_time,
+                    "Duration (min)": t.duration_minutes,
+                    "Priority": PRIORITY_BADGE[t.priority.name],
+                    "Done": t.completed,
+                }
+                for t in owner.all_tasks
+            ],
+            use_container_width=True,
+            hide_index=True,
+        )
     else:
         st.info("No tasks yet. Add one above.")
 
@@ -98,8 +104,54 @@ if st.button("Generate schedule"):
         st.warning("Add at least one pet and one task first.")
     else:
         scheduler = Scheduler(owner=owner, pets=owner.pets)
-        schedule = scheduler.generate_daily_schedule()
 
-        st.success(f"Today's plan for {owner.name} — {scheduler.total_time_minutes()} min total")
+        pending_count   = len(scheduler.get_pending_tasks())
+        completed_count = len(scheduler.get_completed_tasks())
+        total_min       = scheduler.total_time_minutes()
+
+        # Summary metrics
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Pending tasks",   pending_count)
+        m2.metric("Completed tasks", completed_count)
+        m3.metric("Time remaining",  f"{total_min} min")
+
+        # Conflict warnings
+        conflicts = scheduler.detect_conflicts()
+        if conflicts:
+            for a, b in conflicts:
+                st.warning(
+                    f"Scheduling conflict: **{a.title}** ({a.start_time}, {a.duration_minutes} min) "
+                    f"overlaps with **{b.title}** ({b.start_time}, {b.duration_minutes} min)"
+                )
+        else:
+            st.success("No scheduling conflicts detected.")
+
+        # Sorted pending task list with Done buttons
+        st.caption("Today's schedule — sorted by start time")
         for task in scheduler.sort_by_time():
-            st.markdown(f"- **{task.start_time}** [{task.priority.name}] {task.pet.name}: {task.title} ({task.duration_minutes} min)")
+            col_badge, col_info, col_btn = st.columns([1, 5, 1])
+            with col_badge:
+                st.markdown(PRIORITY_BADGE[task.priority.name])
+            with col_info:
+                st.markdown(
+                    f"**{task.start_time}** &nbsp; {task.pet.name}: {task.title} "
+                    f"<span style='color:grey'>({task.duration_minutes} min)</span>",
+                    unsafe_allow_html=True,
+                )
+            with col_btn:
+                if st.button("Done", key=f"done_{id(task)}"):
+                    scheduler.complete_task(task)
+                    st.rerun()
+
+        # Completed tasks
+        if completed_count:
+            with st.expander(f"Completed tasks ({completed_count})"):
+                st.table([
+                    {
+                        "Pet": t.pet.name,
+                        "Task": t.title,
+                        "Start": t.start_time,
+                        "Duration (min)": t.duration_minutes,
+                    }
+                    for t in scheduler.get_completed_tasks()
+                ])
